@@ -2,7 +2,7 @@ import {Injectable} from '@angular/core';
 import {Hero} from './hero';
 import {Observable, of} from 'rxjs';
 import {MessageService} from './message.service';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {catchError, tap} from 'rxjs/operators';
 
 // @Injectable() decorator marks the class as one that participates in the dependency injection system.
@@ -14,6 +14,7 @@ import {catchError, tap} from 'rxjs/operators';
 export class HeroService {
 
   private heroesUrl = 'api/heroes';
+  private httpOptions = {headers: new HttpHeaders({'Content-Type': 'application/json'})};
 
   constructor(private http: HttpClient, private messageService: MessageService) {}
 
@@ -50,5 +51,12 @@ export class HeroService {
 
   private log(message: string): void  {
     this.messageService.add(`HeroService: ${message}`);
+  }
+
+  updateHero(hero: Hero): Observable<any> {
+    return this.http.put(this.heroesUrl, hero, this.httpOptions).pipe(
+      tap(() => this.log(`Updated hero id=${hero.id}`)),
+      catchError(this.handleError<any>('updateHero'))
+    );
   }
 }
