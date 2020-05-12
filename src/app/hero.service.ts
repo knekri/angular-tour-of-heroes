@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Hero} from './hero';
-import {HEROES} from './mock-heroes';
 import {Observable, of} from 'rxjs';
 import {MessageService} from './message.service';
+import {HttpClient} from '@angular/common/http';
+import {catchError, tap} from 'rxjs/operators';
 
 // @Injectable() decorator marks the class as one that participates in the dependency injection system.
 // The HeroService class is going to provide an injectable service, and it can also have its own injected dependencies.
@@ -12,17 +13,42 @@ import {MessageService} from './message.service';
 // Services are a great way to share information among classes that don't know each other
 export class HeroService {
 
-  constructor(private messageService: MessageService) {}
+  private heroesUrl = 'api/heroes';
+
+  constructor(private http: HttpClient, private messageService: MessageService) {}
 
   // Observable<Hero[]> that emits a single value, the array of mock heroes.
-  gerHeroes(): Observable<Hero[]> {
-    this.messageService.add('Heroes are fetched!');
-    return of(HEROES);
+  getHeroes(): Observable<Hero[]> {
+    return this.http.get<Hero[]>(this.heroesUrl)
+      // The catchError() operator intercepts an Observable that failed.
+      // It passes the error an error handler that can do what it wants with the error.
+      .pipe(tap(_ => this.log('heroes fetched')), catchError(this.handleError<Hero[]>('getHeroes', [])));
+  }
+
+  /**
+   * Handle Http operation that failed.
+   * Let the app continue.
+   * @param operation - name of the operation that failed
+   * @param result - optional value to return as the observable result
+   */
+  private handleError<T>(operation: string = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(error);
+      this.log(`${operation} failed: ${error.message}`);
+      return of(result as T);
+    };
   }
 
   getHero(id: number): Observable<Hero> {
-    this.messageService.add(`HeroService: fetched hero id=${id}`);
-    const heroById = hero => hero.id === id;
-    return of(HEROES.find(heroById));
+    const url  = `${this.heroesUrl}/${id}`;
+    return this.http.get<Hero>(url).pipe(
+      tap(x => this.log(`hero fetched id= ${id}`)),
+      catchError(this.handleError<Hero>(`getHero by id=${id}`))
+    );
+
+  }
+
+  private log(message: string): void  {
+    this.messageService.add(`HeroService: ${message}`);
   }
 }
