@@ -11,10 +11,7 @@ import {MessageService} from '../message.service';
 })
 export class HeroesComponent implements OnInit {
 
-  hero: Hero = { id: 1, name: 'Windstorm' };
-
   heroes: Hero[];
-  selectedHero: Hero;
 
   // The parameter simultaneously defines a private heroService property and identifies it as a HeroService injection site.
   constructor(private heroService: HeroService, private  messageService: MessageService) {
@@ -25,13 +22,8 @@ export class HeroesComponent implements OnInit {
     this.getHeroes();
   }
 
-  onSelect(hero: Hero): void {
-    this.messageService.add(`User selected the ${hero.name} hero`);
-    this.selectedHero = hero;
-  }
-
   getHeroes(): void {
-    const initHeroes = heroes => this.heroes = heroes;
-    this.heroService.gerHeroes().subscribe(initHeroes);
+    const allHeroes = heroes => this.heroes = heroes;
+    this.heroService.gerHeroes().subscribe(allHeroes);
   }
 }
