@@ -24,6 +24,7 @@ export class InMemoryDataService implements InMemoryDbService{
 
   constructor() { }
 
+  // https://stackoverflow.com/questions/40146811/multiple-collections-in-angular-in-memory-web-api
   genId(heroes: Hero[]): number {
     // https://developer.mozilla.org/hu/docs/Web/JavaScript/Reference/Operators/Spread_syntax
     return heroes.length > 0 ? Math.max(...heroes.map(hero => hero.id)) + 1 : 11;
